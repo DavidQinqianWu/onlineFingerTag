@@ -1,5 +1,5 @@
 /// <reference path="../declare/declare.d.ts" />;
-import YYM_Request from "./util/request";
+import YYM_Request, { Variable } from "./util/request";
 import Render from "./render/render";
 import Scale from "./util/scale";
 import Container from "./ui/container";
@@ -9,9 +9,10 @@ class Index {
   constructor() {}
   public url(): Promise<object | string> {
     return new Promise((resolve, reject) => {
-      let url: string | undefined = YYM_Request.getQueryVariable("url");
-      if (url) {
-        $.get(url, async function (data: Document, status: string) {
+      let variables: Variable = YYM_Request.getQueryVariable(["url", "songId"]);
+      if (variables.url) {
+        (window as any).variables = variables;
+        $.get(variables.url, async function (data: Document, status: string) {
           if (status === "success") {
             let xmlId2StaffMap = new Prase(data).getNoteXmlObj();
             let renderInstance = Render.generateRenderInstance(data);
@@ -38,6 +39,7 @@ class Index {
 
 (window as any).xmlId2StaffMap = {};
 (window as any).submitResult = {};
+(window as any).variables = {};
 
 window.onload = () => {
   new Index().url().then(
